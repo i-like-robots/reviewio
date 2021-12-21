@@ -51,6 +51,8 @@ It's possible to filter out only the pull requests you're interested in by using
 | `state`         | open, closed, all             | open    | Select only pull requests with a given state.                                                                                                                                        |
 | `weight-method` | changes, simple               | changes | By default weights of pull requests are calculated based on introduced number of changes (sum of additions and deletions). Simple option counts each pull request with equal weight. |
 | `younger-than`  | week, month, year, all        | month   | Taking into account pull requests younger than a specified period.                                                                                                                   |
+| `start`         | An ISO date                   | None    | Filter pull requests by date. Requires the `end` option to be specified too.                                                                                                         |
+| `end`           | An ISO date                   | None    | Filter pull requests by date. Requires the `start` option to be specified too.                                                                                                       |
 | `label`         | labels used in the repository |         | Allows you to filter pull requests using multiple labels.                                                                                                                            |
 
 #### Examples

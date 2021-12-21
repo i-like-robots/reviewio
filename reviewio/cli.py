@@ -40,7 +40,7 @@ def display_user_counter(counter, headline):
     for item, i in sorted(counter.items(), key=lambda pair: pair[1], reverse=True):
         print_bar(i, total_sum, prefix=item.login)
 
-def time_condition(pull_request, condition):
+def time_range_condition(pull_request, condition):
     """Returns True if pull_request's created_at matches given time frame."""
 
     if condition == 'all':
@@ -56,6 +56,14 @@ def time_condition(pull_request, condition):
 
     return pull_request.created_at > datetime.now() - delta
 
+def time_span_condition(pull_request, date_start, date_end):
+    return pull_request.created_at > datetime.fromisoformat(date_start) and pull_request.created_at <= datetime.fromisoformat(date_end)
+
+def time_condition(pull_request, date_range, date_start, date_end):
+    if date_start != None and date_end != None:
+        return time_span_condition(pull_request, date_start, date_end)
+    else:
+        return time_range_condition(pull_request, date_range)
 
 @click.group()
 @click.option('--token', envvar='GITHUB_TOKEN')
@@ -72,10 +80,16 @@ def cli(token):
               help='Select method of calculating weights of pull requests.')
 @click.option('--label', '-l', 'label_list', multiple=True)
 @click.option('--state', default='open')
-@click.option('--younger-than', '-y', 'younger_than',
+@click.option('--younger-than', '-y', 'date_range',
               help='Take into account only pull requests younger than.',
               type=click.Choice(['week', 'month', 'year', 'all']), default='month')
-def show(name, label_list, state, weight_method, younger_than):
+
+@click.option('--start', '-s', 'date_start',
+              help='Take into account only pull requests younger than.', default=None)
+@click.option('--end', '-e', 'date_end',
+              help='Take into account only pull requests older than.', default=None)
+
+def show(name, label_list, state, weight_method, date_range, date_start, date_end):
     """Display reviewers stats for given repository"""
     g = Github(cli.token)
 
@@ -85,7 +99,7 @@ def show(name, label_list, state, weight_method, younger_than):
         raise click.ClickException('Repository not found!')
 
     # filter by creation date
-    pull_requests = [request for request in pull_requests if time_condition(request, younger_than)]
+    pull_requests = [request for request in pull_requests if time_condition(request, date_range, date_start, date_end)]
     pull_requests_length = len(pull_requests)
 
     review_counter = Counter()
